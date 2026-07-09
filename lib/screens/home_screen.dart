@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/user_session.dart';
 import '../db/db_helper.dart'; // Import local database
 import '../models/study_task.dart';
+import 'task_detail_screen.dart';
 import 'task_form_screen.dart'; // Import to enable direct Add Task routing
 
 class HomeScreen extends StatefulWidget {
@@ -121,12 +122,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         onTap: () async {
-          // Navigate to edit form directly from home screen
-          await Navigator.push(
+          final changed = await Navigator.push<bool>(
             context,
-            MaterialPageRoute(builder: (context) => TaskFormScreen(task: task)),
+            MaterialPageRoute(builder: (context) => TaskDetailScreen(task: task)),
           );
-          _loadDashboardData();
+          if (changed == true) {
+            _loadDashboardData();
+          }
         },
       ),
     );
@@ -286,9 +288,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             const SizedBox(height: 12),
             menuCard(context, Icons.task, 'My Tasks', '/tasks'),
+            menuCard(context, Icons.search, 'Search & Filter', '/search'),
+            menuCard(context, Icons.map, 'Study Locations', '/map'),
+            menuCard(context, Icons.music_note, 'Focus Music', '/media'),
             menuCard(context, Icons.person, 'Profile', '/profile'),
             menuCard(context, Icons.settings, 'Settings', '/settings'),
             menuCard(context, Icons.help, 'Help & Support', '/help'),
+            menuCard(context, Icons.info, 'About App', '/about'),
           ],
         ),
       ),

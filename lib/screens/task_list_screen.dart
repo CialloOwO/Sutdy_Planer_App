@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../db/db_helper.dart';
 import '../models/study_task.dart';
+import 'task_detail_screen.dart';
 import 'task_form_screen.dart'; // Import the newly created form screen
 
 class TaskListScreen extends StatefulWidget {
@@ -96,12 +97,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
           isThreeLine: true,
           trailing: Text(task.status, style: const TextStyle(fontWeight: FontWeight.w600)),
           onTap: () async {
-            // [UPDATE] Navigate to Form Screen with the selected task
-            await Navigator.push(
+            final changed = await Navigator.push<bool>(
               context,
-              MaterialPageRoute(builder: (context) => TaskFormScreen(task: task)),
+              MaterialPageRoute(builder: (context) => TaskDetailScreen(task: task)),
             );
-            _refreshTasks(); // Refresh list after returning from edit screen
+            if (changed == true) {
+              _refreshTasks();
+            }
           },
         ),
       ),
@@ -150,9 +152,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             child: const Icon(Icons.delete, color: Colors.white, size: 28),
                           ),
                           onDismissed: (direction) async {
+                            final messenger = ScaffoldMessenger.of(context);
                             await DBHelper.instance.deleteTask(task.id!);
                             _refreshTasks();
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            if (!mounted) return;
+                            messenger.showSnackBar(
                               const SnackBar(content: Text('Task deleted successfully')),
                             );
                           },

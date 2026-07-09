@@ -31,7 +31,7 @@ class HelpScreen extends StatelessWidget {
           Card(
             child: ListTile(
               title: Text('How to delete a task?'),
-              subtitle: Text('Tap the delete icon on the task card.'),
+              subtitle: Text('Swipe left on a task to delete it.'),
             ),
           ),
           SizedBox(height: 16),
