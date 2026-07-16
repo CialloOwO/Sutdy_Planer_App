@@ -16,21 +16,32 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
-
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    TaskListScreen(),
-    SearchScreen(),
-    MapScreen(),
-    MediaScreen(),
-  ];
+  
+  // [新增] 定义一个刷新触发器
+  int _taskRefreshTrigger = 0; 
 
   void _selectTab(int index) {
-    setState(() => _selectedIndex = index);
+    setState(() {
+      _selectedIndex = index;
+      // [新增逻辑] 如果点击的是第二个 Tab (也就是 Tasks)，就让触发器 +1
+      if (index == 1) {
+        _taskRefreshTrigger++;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // [修改] 将原先静态的 _screens 列表移到 build 函数内，以便能够传递动态变量
+    final List<Widget> screens = [
+      const HomeScreen(),
+      // [修改] 传入刷新触发器
+      TaskListScreen(refreshTrigger: _taskRefreshTrigger),
+      const SearchScreen(),
+      const MapScreen(),
+      const MediaScreen(),
+    ];
+
     return Scaffold(
       drawer: Drawer(
         child: SafeArea(
@@ -110,7 +121,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
         ),
       ),
-      body: IndexedStack(index: _selectedIndex, children: _screens),
+      // [修改] 使用新的 screens 列表
+      body: IndexedStack(index: _selectedIndex, children: screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _selectTab,
