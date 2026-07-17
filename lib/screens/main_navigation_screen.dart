@@ -16,21 +16,38 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
-
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    TaskListScreen(),
-    SearchScreen(),
-    MapScreen(),
-    MediaScreen(),
-  ];
+  
+  // [新增] 为三个需要刷新的页面分配独立的触发器
+  int _homeRefreshTrigger = 0;
+  int _taskRefreshTrigger = 0; 
+  int _searchRefreshTrigger = 0;
 
   void _selectTab(int index) {
-    setState(() => _selectedIndex = index);
+    setState(() {
+      _selectedIndex = index;
+      
+      // 根据点击的 Tab，精确增加对应的触发器
+      if (index == 0) {
+        _homeRefreshTrigger++;
+      } else if (index == 1) {
+        _taskRefreshTrigger++;
+      } else if (index == 2) {
+        _searchRefreshTrigger++;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      // [修改] 将三个触发器全部对接完毕
+      HomeScreen(refreshTrigger: _homeRefreshTrigger),
+      TaskListScreen(refreshTrigger: _taskRefreshTrigger),
+      SearchScreen(refreshTrigger: _searchRefreshTrigger),
+      const MapScreen(),
+      const MediaScreen(),
+    ];
+
     return Scaffold(
       drawer: Drawer(
         child: SafeArea(
@@ -110,7 +127,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
         ),
       ),
-      body: IndexedStack(index: _selectedIndex, children: _screens),
+      body: IndexedStack(index: _selectedIndex, children: screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _selectTab,

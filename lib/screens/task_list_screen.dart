@@ -5,9 +5,10 @@ import 'task_detail_screen.dart';
 import 'task_form_screen.dart'; // Import the newly created form screen
 
 class TaskListScreen extends StatefulWidget {
-  // Use int? for highlightTaskId to match SQLite id type
-  const TaskListScreen({super.key, this.highlightTaskId});
+  // [修改] 增加 refreshTrigger 参数
+  const TaskListScreen({super.key, this.highlightTaskId, this.refreshTrigger = 0});
   final int? highlightTaskId;
+  final int refreshTrigger; 
 
   @override
   State<TaskListScreen> createState() => _TaskListScreenState();
@@ -26,6 +27,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
     super.initState();
     _refreshTasks(); // [READ] Fetch data from SQLite when screen loads
     _highlightedTaskId = widget.highlightTaskId;
+  }
+
+  // [新增核心修复逻辑] 当外部传入的 widget 属性改变时触发
+  @override
+  void didUpdateWidget(covariant TaskListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 如果底部导航栏被点击，触发器数字发生变化，则立刻刷新数据库数据！
+    if (widget.refreshTrigger != oldWidget.refreshTrigger) {
+      _refreshTasks();
+    }
   }
 
   /// [READ] Operation: Fetch all tasks from SQLite

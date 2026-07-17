@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../data/user_session.dart';
-import '../db/db_helper.dart'; // Import local database
+import '../db/db_helper.dart'; 
 import '../models/study_task.dart';
 import 'task_detail_screen.dart';
-import 'task_form_screen.dart'; // Import to enable direct Add Task routing
+import 'task_form_screen.dart'; 
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  // [新增] 增加 refreshTrigger 参数
+  const HomeScreen({super.key, this.refreshTrigger = 0});
+  final int refreshTrigger;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,7 +21,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDashboardData(); // Load dynamic data on init
+    _loadDashboardData(); 
+  }
+
+  // [新增核心修复逻辑] 监听外部传入的 refreshTrigger 变化
+  @override
+  void didUpdateWidget(covariant HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 如果底部导航栏点击了 Home，触发器数字发生变化，立刻刷新首页统计数据！
+    if (widget.refreshTrigger != oldWidget.refreshTrigger) {
+      _loadDashboardData();
+    }
   }
 
   /// Fetch tasks from SQLite to calculate dashboard statistics
@@ -45,7 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () async {
-          // Await the route, so if tasks are modified there, we refresh stats upon return
           await Navigator.pushNamed(context, route);
           _loadDashboardData();
         },
@@ -151,7 +162,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // Dynamic Database Statistics Calculations
     final totalTaskCount = _tasks.length;
     final pendingCount = _tasks.where((t) => t.status == 'Pending').length;
     final inProgressCount = _tasks
@@ -161,7 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
         .where((t) => t.daysUntilDue >= 0 && t.daysUntilDue <= 7)
         .length;
 
-    // Get up to 3 upcoming tasks dynamically
     final upcomingList = _tasks.where((t) => t.daysUntilDue >= 0).toList()
       ..sort((a, b) => a.daysUntilDue.compareTo(b.daysUntilDue));
     final upcomingTasks = upcomingList.take(3).toList();
@@ -220,14 +229,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
-                      // Connect "Add Task" button directly to the form
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const TaskFormScreen(),
                         ),
                       );
-                      _loadDashboardData(); // Refresh stats when returning
+                      _loadDashboardData(); 
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Add Task'),
@@ -241,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () async {
                       await Navigator.pushNamed(context, '/tasks');
-                      _loadDashboardData(); // Refresh stats when returning
+                      _loadDashboardData(); 
                     },
                     icon: const Icon(Icons.list_alt),
                     label: const Text('View All'),

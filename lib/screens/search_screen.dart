@@ -5,7 +5,9 @@ import '../models/study_task.dart';
 import 'task_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  // [新增] 增加 refreshTrigger 参数
+  const SearchScreen({super.key, this.refreshTrigger = 0});
+  final int refreshTrigger;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -21,6 +23,16 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
     _loadTasks();
+  }
+
+  // [新增核心修复逻辑] 监听外部传入的 refreshTrigger 变化
+  @override
+  void didUpdateWidget(covariant SearchScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 如果底部导航栏被点击，触发器数字发生变化，立刻刷新数据库数据！
+    if (widget.refreshTrigger != oldWidget.refreshTrigger) {
+      _loadTasks();
+    }
   }
 
   @override
