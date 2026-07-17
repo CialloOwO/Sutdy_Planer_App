@@ -17,27 +17,33 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
   
-  // [新增] 定义一个刷新触发器
+  // [新增] 为三个需要刷新的页面分配独立的触发器
+  int _homeRefreshTrigger = 0;
   int _taskRefreshTrigger = 0; 
+  int _searchRefreshTrigger = 0;
 
   void _selectTab(int index) {
     setState(() {
       _selectedIndex = index;
-      // [新增逻辑] 如果点击的是第二个 Tab (也就是 Tasks)，就让触发器 +1
-      if (index == 1) {
+      
+      // 根据点击的 Tab，精确增加对应的触发器
+      if (index == 0) {
+        _homeRefreshTrigger++;
+      } else if (index == 1) {
         _taskRefreshTrigger++;
+      } else if (index == 2) {
+        _searchRefreshTrigger++;
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // [修改] 将原先静态的 _screens 列表移到 build 函数内，以便能够传递动态变量
     final List<Widget> screens = [
-      const HomeScreen(),
-      // [修改] 传入刷新触发器
+      // [修改] 将三个触发器全部对接完毕
+      HomeScreen(refreshTrigger: _homeRefreshTrigger),
       TaskListScreen(refreshTrigger: _taskRefreshTrigger),
-      const SearchScreen(),
+      SearchScreen(refreshTrigger: _searchRefreshTrigger),
       const MapScreen(),
       const MediaScreen(),
     ];
@@ -121,7 +127,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
         ),
       ),
-      // [修改] 使用新的 screens 列表
       body: IndexedStack(index: _selectedIndex, children: screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
